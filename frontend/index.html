@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Basic Vue Template</title>
+  <title>JungleKitchen</title>
   <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css'>
   <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css'>
   <!-- Axios library for HTTP requests -->
@@ -17,6 +17,7 @@
   <!-- App Template Code Here -->
   <div id="app">
     <p v-on:click="getResponse()">{{data}}</p>
+    <p v-on:click="getTime()">{{time}}</p>
   </div>
 
   <!-- App Script Code Here -->
@@ -26,12 +27,20 @@
       data() {
         return {
           data: 'Click me',
+          time: 'Click me too',
         };
       },
       methods: {
         getResponse() {
           axios.get('http://localhost:5000/helloworld').then((res) => {
             this.data = res.data;
+          }).catch((error) => {
+            console.error(error);
+          });
+        },
+        getTime() {
+          axios.get('http://localhost:5000/time').then((res) => {
+            this.time = res.data;
           }).catch((error) => {
             console.error(error);
           });

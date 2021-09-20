@@ -3,6 +3,7 @@ from flask_cors import CORS
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
 import random
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -10,6 +11,10 @@ CORS(app)
 @app.route('/helloworld', methods=['GET'])
 def test():
     return "Hello World"
+
+@app.route('/time', methods=['GET'])
+def getTime():
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 @app.route('/hello', methods=['GET'])
 def test_2():
