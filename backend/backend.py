@@ -12,6 +12,10 @@ CORS(app)
 def test():
     return "Hello World"
 
+@app.route('/danielAssignment1part3', methods=['GET'])
+def assignmentCall():
+    return "Hey There"
+
 @app.route('/time', methods=['GET'])
 def getTime():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
