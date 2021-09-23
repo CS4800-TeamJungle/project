@@ -61,7 +61,7 @@ def test_captcha(letters):
         random_y = random.randint(0, int(text_img_height / 2.25))  # random y position
         ImageDraw.Draw(text_img).text((random_x, random_y),
                                       letters[t],
-                                      font=ImageFont.truetype("arial.ttf", random.randint(28, 35)),  # random font size
+                                      font=ImageFont.truetype("./arial.ttf", random.randint(28, 35)),  # random font size
                                       fill=random_color())  # random color
 
     # rotate image randomly
@@ -91,4 +91,4 @@ def test_captcha(letters):
 def cowsays(f):
     return cowsay.get_output_string('cow', f)
 
-app.run()
+app.run(host='0.0.0.0', port=80)
