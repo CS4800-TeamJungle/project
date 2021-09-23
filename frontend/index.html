@@ -17,7 +17,8 @@
   <!-- App Template Code Here -->
   <div>
     <p v-on:click="getResponse()">{{data}}</p>
-    <p v-on:click="getTime()">{{time}}</p>
+    <input v-model="cowText">
+    <pre v-on:click="getCow()">{{cow}}</pre>
   </div>
 </body>
 
@@ -30,7 +31,8 @@
     data() {
       return {
         data: 'Click me',
-        time: 'Click me too',
+        cow: 'Click me too',
+        cowText: 'Moo!'
       };
     },
     methods: {
@@ -41,9 +43,9 @@
           console.error(error);
         });
       },
-      getTime() {
-        axios.get('http://localhost:5000/time').then((res) => {
-          this.time = res.data;
+      getCow() {
+        axios.get('http://localhost:5000/cowsays/' + this.cowText).then((res) => {
+          this.cow = res.data;
         }).catch((error) => {
           console.error(error);
         });

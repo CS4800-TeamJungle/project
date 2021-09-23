@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
 import random
 from datetime import datetime
+import cowsay
 
 app = Flask(__name__)
 CORS(app)
@@ -85,5 +86,9 @@ def test_captcha(letters):
     img.save(img_io, 'png')
     img_io.seek(0)
     return send_file(img_io, mimetype='image/png') 
+
+@app.route('/cowsays/<f>', methods=['GET'])
+def cowsays(f):
+    return cowsay.get_output_string('cow', f)
 
 app.run()
