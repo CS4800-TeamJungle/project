@@ -5,6 +5,7 @@ from PIL import Image, ImageFont, ImageDraw, ImageFilter
 import random
 from datetime import datetime
 import cowsay
+import recipeScraper as rS
 
 app = Flask(__name__)
 CORS(app)
@@ -13,9 +14,11 @@ CORS(app)
 def test():
     return "Hello World"
 
-@app.route('/danielAssignment1part3', methods=['GET'])
+@app.route('/danielAssignment4', methods=['GET'])
 def assignmentCall():
-    return "Hey There"
+    ingredients = rS.getIngredients()
+    print(ingredients)
+    return(str(ingredients))
 
 @app.route('/time', methods=['GET'])
 def getTime():
