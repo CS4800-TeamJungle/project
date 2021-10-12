@@ -94,4 +94,5 @@ def test_captcha(letters):
 def cowsays(f):
     return cowsay.get_output_string('cow', f)
 
-app.run()
+if __name__ == '__main__':
+    app.run()
