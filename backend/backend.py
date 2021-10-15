@@ -8,6 +8,7 @@ import cowsay
 import recipeScraper as rS
 
 app = Flask(__name__)
+app.config.from_object("config.Config")
 CORS(app)
 
 @app.route('/helloworld', methods=['GET'])
