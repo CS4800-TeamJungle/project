@@ -42,6 +42,7 @@
         </Collapsible>
       </div>
     </div>
+    <div>{{ this.$store.state.userInventory }}</div>
   </div>
 </template>
 
@@ -57,6 +58,7 @@ export default {
     return {
       recipes: [
         {
+          id: 0,
           title: "Grilled Cheese",
           ingredients: ["cheese", "bread", "mayonnaise"],
           directions: [
@@ -69,6 +71,7 @@ export default {
           NER: ["easy", "food"]
         },
         {
+          id: 1,
           title: "Soup",
           ingredients: ["soup"],
           directions: ["heat the soup"],
