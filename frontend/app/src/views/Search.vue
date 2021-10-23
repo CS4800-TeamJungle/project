@@ -4,7 +4,10 @@
     <div id="searchUI">
       <div
         class="recipe"
-        v-for="recipe in this.recipes"
+        v-for="recipe in this.recipes.slice(
+          this.currentPageIndex * this.recipesPerPage,
+          this.currentPageIndex * this.recipesPerPage + this.recipesPerPage
+        )"
         v-bind:key="recipe.title"
       >
         {{ recipe.title }} |
@@ -42,7 +45,20 @@
         </Collapsible>
       </div>
     </div>
-    <div>{{ this.$store.state.userInventory }}</div>
+    <div>
+      <font-awesome-icon
+        v-on:click="pageLeft()"
+        style="float: left"
+        icon="angle-double-left"
+        size="1x"
+      />
+      <font-awesome-icon
+        v-on:click="pageRight()"
+        style="float: right"
+        icon="angle-double-right"
+        size="1x"
+      />
+    </div>
   </div>
 </template>
 
@@ -77,11 +93,57 @@ export default {
           directions: ["heat the soup"],
           link: "https://www.cpp.edu/soup",
           NER: ["easy", "food"]
+        },
+        {
+          id: 2,
+          title: "Gah",
+          ingredients: ["soup"],
+          directions: ["heat the soup"],
+          link: "https://www.cpp.edu/soup",
+          NER: ["easy", "food"]
+        },
+        {
+          id: 3,
+          title: "F",
+          ingredients: ["soup"],
+          directions: ["heat the soup"],
+          link: "https://www.cpp.edu/soup",
+          NER: ["easy", "food"]
+        },
+        {
+          id: 4,
+          title: "FSDf",
+          ingredients: ["soup"],
+          directions: ["heat the soup"],
+          link: "https://www.cpp.edu/soup",
+          NER: ["easy", "food"]
+        },
+        {
+          id: 5,
+          title: "DFSD",
+          ingredients: ["soup"],
+          directions: ["heat the soup"],
+          link: "https://www.cpp.edu/soup",
+          NER: ["easy", "food"]
         }
-      ]
+      ],
+      recipesPerPage: 4,
+      currentPageIndex: 0
     };
   },
-  methods: {}
+  methods: {
+    pageLeft() {
+      if (this.currentPageIndex > 0) {
+        this.currentPageIndex--;
+      }
+    },
+    pageRight() {
+      var maxPages = Math.ceil(this.recipes.length / this.recipesPerPage);
+      if (this.currentPageIndex < maxPages - 1) {
+        this.currentPageIndex++;
+      }
+    }
+  }
 };
 </script>
 

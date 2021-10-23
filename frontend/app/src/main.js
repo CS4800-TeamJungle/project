@@ -6,11 +6,19 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faUserSecret,
   faTimes,
-  faUtensils
+  faUtensils,
+  faAngleDoubleLeft,
+  faAngleDoubleRight
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-library.add(faUserSecret, faTimes, faUtensils);
+library.add(
+  faUserSecret,
+  faTimes,
+  faUtensils,
+  faAngleDoubleLeft,
+  faAngleDoubleRight
+);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
