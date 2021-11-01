@@ -10,7 +10,7 @@ import recipeScraper as rS
 
 app = Flask(__name__)
 app.config.from_object("config.Config")
-mongo = PyMongo(app) if app.config['MONGO_URI'] == 'PLACEHOLDER_STRING' else None
+mongo = PyMongo(app) if app.config['MONGO_URI'] != 'PLACEHOLDER_STRING' else None
 CORS(app)
 
 @app.route('/search', methods=['GET'])
@@ -51,6 +51,24 @@ def mongo_search_NER_post():
 
     # print(time.time()-t3)
     # print(time.time()-t1)
+    return jsonify(output)
+
+@app.route('/search_v2', methods=['POST'])
+def mongo_search_NER_post_v2():
+    NER = request.json['NER']
+    start_id = 0 if (request.json.get('start_id') is None or request.json.get('start_id') < 0) else request.json['page_size']
+    amount = 50 if (request.json.get('amount') is None or request.json.get('amount') <= 0) else request.json['amount']
+
+    results = mongo.db.recipes.find({'NER': {'$all': NER}, 'index': {'$gt': start_id-1}}).limit(amount)
+    output = {'recipes' : [], 'start_id': -1, 'end_id': -1}
+
+    indexes = []
+    for result in results:
+        output['recipes'].append({'title': result['title'], 'ingredients': result['ingredients'], 'directions': result['directions'], 'link': result['link'], 'NER': result['NER']})
+        indexes.append(result['index'])
+    output['start_id'] = indexes[0]
+    output['end_id'] = indexes[-1]
+
     return jsonify(output)
 
 @app.route('/helloworld', methods=['GET'])
