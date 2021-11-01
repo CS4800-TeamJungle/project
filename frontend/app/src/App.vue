@@ -31,3 +31,14 @@
   }
 }
 </style>
+
+<script>
+export default {
+  setup() {},
+  name: "Home",
+  components: {},
+  data() {
+    return {};
+  }
+};
+</script>

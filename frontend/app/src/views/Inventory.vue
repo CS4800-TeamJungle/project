@@ -7,7 +7,7 @@
         <p>Please enter the ingredient to add below</p>
         <v-suggest
           id="inputName"
-          :data="validFoods"
+          :data="this.$store.state.validIngs"
           show-field="name"
           v-model="userInputName"
         ></v-suggest>
@@ -22,16 +22,16 @@
         <select
           v-if="
             this.userInputName.length > 0 &&
-            this.getFoodIdFromName(this.userInputName) != undefined &&
-            this.getFoodUnitType(this.getFoodIdFromName(this.userInputName)) !=
-              'count'
+            this.getIngIdFromName(this.userInputName) != undefined &&
+            this.getIngById(this.getIngIdFromName(this.userInputName))
+              .unitType != 'count'
           "
           id="unitSelector"
           v-model="userInputUnit"
         >
           <option
-            v-for="unit in this.getFoodUnitList(
-              this.getFoodIdFromName(this.userInputName)
+            v-for="unit in this.getIngUnitList(
+              this.getIngIdFromName(this.userInputName)
             )"
             v-bind:key="unit"
           >
@@ -39,15 +39,19 @@
           </option>
         </select>
         <button v-on:click="addIngredient()">Add Ingredient</button>
+        <button>Save Inventory</button>
       </div>
 
       <div id="userInventory">
-        <div v-for="item in userInventory" v-bind:key="item.id">
+        <div
+          v-for="item in this.$store.state.userInventory"
+          v-bind:key="item.id"
+        >
           <font-awesome-icon v-on:click="removeIngredient(item)" icon="times" />
           {{ item.name }} - <input v-model="item.amount" />
           <select v-if="item.unit.length > 0" v-model="item.unit">
             <option
-              v-for="unit in getFoodUnitList(getFoodIdFromName(item.name))"
+              v-for="unit in getIngUnitList(getIngIdFromName(item.name))"
               v-bind:key="unit"
             >
               {{ unit }}
@@ -70,106 +74,28 @@ export default {
     return {
       userInputName: "",
       userInputAmount: "",
-      userInputUnit: "",
-      userInventory: [
-        /*
-          {
-              id: -1,
-              name: foodName,
-              unit
-          }
-          */
-      ],
-      validFoods: [
-        {
-          id: 0,
-          name: "Eggs",
-          unitType: "count"
-        },
-        {
-          id: 1,
-          name: "Milk",
-          unitType: "volume"
-        },
-        {
-          id: 2,
-          name: "Oatmeal",
-          unitType: "volume"
-        },
-        {
-          id: 3,
-          name: "Apples",
-          unitType: "count"
-        }
-      ],
-      unitTypes: [
-        {
-          type: "volume",
-          units: [
-            "teaspoon",
-            "tablespoon",
-            "fluid oz",
-            "pint",
-            "cup",
-            "quart",
-            "gallon",
-            "milliliter",
-            "liter"
-          ]
-        },
-        {
-          type: "weight",
-          units: ["ounce", "pound", "gram", "kilogram"]
-        },
-        {
-          type: "count",
-          units: [""]
-        }
-      ]
+      userInputUnit: ""
     };
   },
   methods: {
     removeIngredient(item) {
-      for (var i = 0; i < this.userInventory.length; i++) {
-        if (this.userInventory[i].id == item.id) {
-          this.userInventory.splice(i, 1);
-        }
-      }
+      this.$store.commit("removeIngredient", item.id);
     },
-    getFoodIdFromName(name) {
-      return this.validFoods.find((item) => item.name == name).id;
+    getIngIdFromName(name) {
+      return this.$store.getters.getIngIdFromName(name);
     },
-    getFoodName(id) {
-      return this.validFoods.find((item) => item.id == id).name;
+    getIngById(id) {
+      return this.$store.getters.getIngById(id);
     },
-    getFoodUnitType(id) {
-      return this.validFoods.find((item) => item.id == id).unitType;
-    },
-    getFoodItem(id) {
-      return this.validFoods.find((item) => item.id == id);
-    },
-    getFoodUnitList(id) {
-      return this.unitTypes.find(
-        (item) => item.type == this.getFoodUnitType(id)
-      ).units;
+    getIngUnitList(id) {
+      return this.$store.getters.getIngUnitList(id);
     },
     userHasIngredient(id) {
-      return this.userInventory.find((item) => item.id == id) != undefined;
-    },
-    sortUserInventory() {
-      this.userInventory.sort(function (a, b) {
-        if (a.name < b.name) {
-          return -1;
-        }
-        if (a.name > b.name) {
-          return 1;
-        }
-        return 0;
-      });
+      return this.$store.getters.userHasIngredient(id);
     },
     addIngredient() {
       // Valid food
-      var inputId = this.getFoodIdFromName(this.userInputName);
+      var inputId = this.getIngIdFromName(this.userInputName);
 
       //User has it already
       if (this.userHasIngredient(inputId)) {
@@ -177,13 +103,13 @@ export default {
       }
 
       if (inputId != undefined) {
-        this.userInventory.push({
+        this.$store.commit("addIngredient", {
           id: inputId,
-          name: this.getFoodName(inputId),
+          name: this.getIngById(inputId).name,
           amount: this.userInputAmount,
           unit: this.userInputUnit
         });
-        this.sortUserInventory();
+        this.$store.commit("sortInventory");
         this.userInputName = "";
         this.userInputAmount = "";
         this.userInputUnit = "";
@@ -199,5 +125,9 @@ div#inventoryUI {
 }
 input#inputAmount {
   margin-left: 70px;
+  border: 1px solid #ccc;
+}
+div.v-suggest input {
+  width: inherit;
 }
 </style>

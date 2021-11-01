@@ -1,5 +1,6 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
+from flask_pymongo import PyMongo
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
 import random
@@ -8,7 +9,67 @@ import cowsay
 import recipeScraper as rS
 
 app = Flask(__name__)
+app.config.from_object("config.Config")
+mongo = PyMongo(app) if app.config['MONGO_URI'] != 'PLACEHOLDER_STRING' else None
 CORS(app)
+
+@app.route('/search', methods=['GET'])
+def mongo_search_NER():
+    query = request.args.get('NER', type=str)
+    results = mongo.db.recipes.find({'NER': query}).limit(10)
+    output = []
+    for result in results:
+        output.append({'title': result['title'], 'ingredients': result['ingredients'], 'directions': result['directions'], 'link': result['link'], 'NER': result['NER']})
+    return jsonify(output)
+
+@app.route('/search', methods=['POST'])
+def mongo_search_NER_post():
+    # t1 = time.time()
+    NER = request.json['NER']
+    num_page = 5 if request.json.get('num_page') is None else request.json['num_page']
+    page_index = 0 if (request.json.get('page_index') is None or request.json.get('page_index') >= num_page) else request.json['page_size']
+    page_size = 10 if request.json.get('page_size') is None else request.json['page_size']
+    start_id = 1 if request.json.get('start_id') is None else request.json['start_id']
+    # t2 = time.time()
+    results = mongo.db.recipes.find({'NER': {'$all': NER}, 'index': {'$gt': start_id-1}}).skip(page_size * page_index).limit(page_size)
+    # print(time.time() - t2)
+    output = {'recipes' : [], 'next_id': -1, 'end_page_index': -1, 'page_index': page_index}
+    # t3 = time.time()
+    
+    for result in results:
+        output['recipes'].append({'title': result['title'], 'ingredients': result['ingredients'], 'directions': result['directions'], 'link': result['link'], 'NER': result['NER']})
+    # print(time.time()-t3)
+    if len(output['recipes']) < page_size:
+        output['end_page_index'] = page_index
+    elif page_index == 0:   # Get the start id of next group when fetching the first page of the current group
+        next_group_result = mongo.db.recipes.find({'NER': {'$all': NER}, 'index': {'$gt': start_id-1}}).skip(page_size * num_page).limit(1)
+        next_group_result = list(next_group_result)
+        if len(next_group_result) == 0:
+            output['end_page_index'] = num_page - 1
+        else:
+            output['next_id'] = next_group_result[0]['index']
+
+    # print(time.time()-t3)
+    # print(time.time()-t1)
+    return jsonify(output)
+
+@app.route('/search_v2', methods=['POST'])
+def mongo_search_NER_post_v2():
+    NER = request.json['NER']
+    start_id = 0 if (request.json.get('start_id') is None or request.json.get('start_id') < 0) else request.json['page_size']
+    amount = 50 if (request.json.get('amount') is None or request.json.get('amount') <= 0) else request.json['amount']
+
+    results = mongo.db.recipes.find({'NER': {'$all': NER}, 'index': {'$gt': start_id-1}}).limit(amount)
+    output = {'recipes' : [], 'start_id': -1, 'end_id': -1}
+
+    indexes = []
+    for result in results:
+        output['recipes'].append({'title': result['title'], 'ingredients': result['ingredients'], 'directions': result['directions'], 'link': result['link'], 'NER': result['NER']})
+        indexes.append(result['index'])
+    output['start_id'] = indexes[0]
+    output['end_id'] = indexes[-1]
+
+    return jsonify(output)
 
 @app.route('/helloworld', methods=['GET'])
 def test():

@@ -5,3 +5,4 @@ Pillow
 cowsay
 recipe-scrapers
 pytest
+flask_pymongo
