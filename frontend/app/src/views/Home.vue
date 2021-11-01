@@ -22,7 +22,7 @@ export default {
   methods: {
     getResponse() {
       axios
-        .get("http://localhost:5000/helloworld")
+        .get("https://www.junglekitchen.top/api/helloworld")
         .then((res) => {
           this.data = res.data;
         })
@@ -32,7 +32,7 @@ export default {
     },
     getTime() {
       axios
-        .get("http://localhost:5000/time")
+        .get("https://www.junglekitchen.top/api/time")
         .then((res) => {
           this.time = res.data;
         })
