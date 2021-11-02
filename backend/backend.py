@@ -56,7 +56,7 @@ def mongo_search_NER_post():
 @app.route('/search_v2', methods=['POST'])
 def mongo_search_NER_post_v2():
     NER = request.json['NER']
-    start_id = 0 if (request.json.get('start_id') is None or request.json.get('start_id') < 0) else request.json['page_size']
+    start_id = 0 if (request.json.get('start_id') is None or request.json.get('start_id') < 0) else request.json['start_id']
     amount = 50 if (request.json.get('amount') is None or request.json.get('amount') <= 0) else request.json['amount']
 
     results = mongo.db.recipes.find({'NER': {'$all': NER}, 'index': {'$gt': start_id-1}}).limit(amount)
