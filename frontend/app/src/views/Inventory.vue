@@ -5,12 +5,16 @@
     <div id="inventoryUI">
       <div id="addIngredient">
         <p>Please enter the ingredient to add below</p>
-        <v-suggest
-          id="inputName"
-          :data="this.$store.state.validIngs"
-          show-field="name"
+
+        <vue-simple-suggest
           v-model="userInputName"
-        ></v-suggest>
+          :list="this.$store.state.validIngs"
+          placeholder="Please enter ingredient name..."
+          display-attribute="name"
+          value-attribute="name"
+          :filter-by-query="true"
+        >
+        </vue-simple-suggest>
 
         <input
           id="inputAmount"
@@ -65,11 +69,12 @@
 
 <script>
 import axios from "axios";
-import { Suggest } from "v-suggest";
+import VueSimpleSuggest from "vue-simple-suggest";
+import "vue-simple-suggest/dist/styles.css"; // Optional CSS
 
 export default {
   name: "Inventory",
-  components: { "v-suggest": Suggest },
+  components: { VueSimpleSuggest },
   data() {
     return {
       userInputName: "",
