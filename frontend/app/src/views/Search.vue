@@ -1,6 +1,6 @@
 <template>
   <div class="search">
-    <h1>This is a search page</h1>
+    <h1 v-on:click="searchRecipes()">This is a search page</h1>
     <div id="searchUI">
       <div
         class="recipe"
@@ -8,10 +8,12 @@
           this.currentPageIndex * this.recipesPerPage,
           this.currentPageIndex * this.recipesPerPage + this.recipesPerPage
         )"
-        v-bind:key="recipe.title"
+        v-bind:key="recipe.link"
       >
         {{ recipe.title }} |
-        <a class="recipe-link" v-bind:href="recipe.link">{{ recipe.link }}</a>
+        <a class="recipe-link" v-bind:href="'https://' + recipe.link">{{
+          recipe.link
+        }}</a>
         <br />
         <span class="tags">
           Tags:
@@ -52,6 +54,7 @@
         icon="angle-double-left"
         size="1x"
       />
+      <div>{{ this.currentPageIndex + 1 }} / {{ this.loadedPages }}</div>
       <font-awesome-icon
         v-on:click="pageRight()"
         style="float: right"
@@ -72,64 +75,30 @@ export default {
   components: { Collapsible },
   data() {
     return {
-      recipes: [
-        {
-          id: 0,
-          title: "Grilled Cheese",
-          ingredients: ["cheese", "bread", "mayonnaise"],
-          directions: [
-            "add mayo to bread",
-            "add kraft american cheese single to taste",
-            "heat bread",
-            "profit?"
-          ],
-          link: "https://www.cpp.edu/grilled-cheese",
-          NER: ["easy", "food"]
-        },
-        {
-          id: 1,
-          title: "Soup",
-          ingredients: ["soup"],
-          directions: ["heat the soup"],
-          link: "https://www.cpp.edu/soup",
-          NER: ["easy", "food"]
-        },
-        {
-          id: 2,
-          title: "Gah",
-          ingredients: ["soup"],
-          directions: ["heat the soup"],
-          link: "https://www.cpp.edu/soup",
-          NER: ["easy", "food"]
-        },
-        {
-          id: 3,
-          title: "F",
-          ingredients: ["soup"],
-          directions: ["heat the soup"],
-          link: "https://www.cpp.edu/soup",
-          NER: ["easy", "food"]
-        },
-        {
-          id: 4,
-          title: "FSDf",
-          ingredients: ["soup"],
-          directions: ["heat the soup"],
-          link: "https://www.cpp.edu/soup",
-          NER: ["easy", "food"]
-        },
-        {
-          id: 5,
-          title: "DFSD",
-          ingredients: ["soup"],
-          directions: ["heat the soup"],
-          link: "https://www.cpp.edu/soup",
-          NER: ["easy", "food"]
-        }
-      ],
-      recipesPerPage: 4,
-      currentPageIndex: 0
+      recipes: [], //An array holding the recipe objects
+      recipesPerPage: 5, //The amount of recipes to show per page
+      currentPageIndex: 0, //The index of the current page the user is viewing
+      fetchAmount: 10, //The amount of recipes to fetch in each request
+      endRecipeIndex: -1, //The index of the recipe that is at the end of this.recipes. Note: index is based on position in mongodb not this.recipes
+      endReached: false //Set to true when the amount of retrieved recipes doesn't equal the amount requested, and prevents further recipe requests
     };
+  },
+  computed: {
+    //loadedPages stores how many total pages are available based on how many recipes are stored and how many recipes appear per page
+    //Because it is a computed property anytime this.recipes.length or this.recipesPerPage change it is re-evaluated
+    loadedPages: function () {
+      return Math.ceil(this.recipes.length / this.recipesPerPage);
+    },
+    userInventoryLength: function () {
+      return this.$store.getters.getUserIngredientList().length;
+    }
+  },
+  // This function is run each time the search result page is loaded
+  created() {
+    //If the user has ingredients send a request to the API for recipes
+    if (this.userInventoryLength !== 0) {
+      this.fetchRecipesFromAPI(0, this.fetchAmount);
+    }
   },
   methods: {
     pageLeft() {
@@ -138,10 +107,43 @@ export default {
       }
     },
     pageRight() {
-      var maxPages = Math.ceil(this.recipes.length / this.recipesPerPage);
-      if (this.currentPageIndex < maxPages - 1) {
+      if (this.currentPageIndex < this.loadedPages - 1) {
         this.currentPageIndex++;
       }
+      //If the user is within a page of the last loaded page send a request for more recipes
+      if (
+        this.userInventoryLength !== 0 &&
+        this.loadedPages - 1 - 1 <= this.currentPageIndex &&
+        !this.endReached
+      ) {
+        this.fetchRecipesFromAPI(this.endRecipeIndex + 1, this.fetchAmount);
+      }
+    },
+    //Uses a post request to retrieve a list of recipes
+    //start: fetch recipes starting with the recipe with this index.
+    //        Note: this index is an identifier of the recipe itself and doesn't reflect it's position in the database search results or in this.recipes
+    //amount: the amount of recipes to fetch
+    //Results:
+    //          If successful this.recipes is concatenated with the results of the search
+    //          this.endRecipeIndex is updated to be the index of the last recipe in the returned list
+    fetchRecipesFromAPI(startID, amount) {
+      console.log("Fetching recipes...");
+      axios
+        .post("https://www.junglekitchen.top/api/search_v2", {
+          NER: this.$store.getters.getUserIngredientList(),
+          start_id: startID,
+          amount: amount
+        })
+        .then((res) => {
+          if (!this.endReached && amount != res.data.recipes.length) {
+            this.endReached = true;
+          }
+          this.recipes = this.recipes.concat(res.data.recipes);
+          this.endRecipeIndex = res.data.end_id;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
   }
 };

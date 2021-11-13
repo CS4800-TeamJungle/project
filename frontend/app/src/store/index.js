@@ -68,6 +68,11 @@ export default new Vuex.Store({
     },
     userHasIngredient: (state) => (id) => {
       return state.userInventory.find((item) => item.id == id) != undefined;
+    },
+    getUserIngredientList: (state) => () => {
+      return state.userInventory.map(function (item) {
+        return item.name;
+      });
     }
   },
   mutations: {
