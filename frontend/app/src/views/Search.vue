@@ -8,7 +8,7 @@
           this.currentPageIndex * this.recipesPerPage,
           this.currentPageIndex * this.recipesPerPage + this.recipesPerPage
         )"
-        v-bind:key="recipe.link"
+        v-bind:key="recipe.index"
       >
         {{ recipe.title }} |
         <a class="recipe-link" v-bind:href="'https://' + recipe.link">{{
@@ -79,7 +79,6 @@ export default {
       recipesPerPage: 5, //The amount of recipes to show per page
       currentPageIndex: 0, //The index of the current page the user is viewing
       fetchAmount: 10, //The amount of recipes to fetch in each request
-      endRecipeIndex: -1, //The index of the recipe that is at the end of this.recipes. Note: index is based on position in mongodb not this.recipes
       endReached: false //Set to true when the amount of retrieved recipes doesn't equal the amount requested, and prevents further recipe requests
     };
   },
@@ -91,6 +90,9 @@ export default {
     },
     userInventoryLength: function () {
       return this.$store.getters.getUserIngredientList().length;
+    },
+    endRecipeIndex: function () {
+      return this.recipes[this.recipes.length - 1].index;
     }
   },
   // This function is run each time the search result page is loaded
@@ -125,7 +127,6 @@ export default {
     //amount: the amount of recipes to fetch
     //Results:
     //          If successful this.recipes is concatenated with the results of the search
-    //          this.endRecipeIndex is updated to be the index of the last recipe in the returned list
     fetchRecipesFromAPI(startID, amount) {
       console.log("Fetching recipes...");
       axios
@@ -139,7 +140,6 @@ export default {
             this.endReached = true;
           }
           this.recipes = this.recipes.concat(res.data.recipes);
-          this.endRecipeIndex = res.data.end_id;
         })
         .catch((error) => {
           console.error(error);
