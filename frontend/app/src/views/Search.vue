@@ -79,7 +79,8 @@ export default {
       recipesPerPage: 5, //The amount of recipes to show per page
       currentPageIndex: 0, //The index of the current page the user is viewing
       fetchAmount: 10, //The amount of recipes to fetch in each request
-      endRecipeIndex: -1 //The index of the recipe that is at the end of this.recipes. Note: index is based on position in mongodb not this.recipes
+      endRecipeIndex: -1, //The index of the recipe that is at the end of this.recipes. Note: index is based on position in mongodb not this.recipes
+      endReached: false //Set to true when the amount of retrieved recipes doesn't equal the amount requested, and prevents further recipe requests
     };
   },
   computed: {
@@ -112,7 +113,8 @@ export default {
       //If the user is within a page of the last loaded page send a request for more recipes
       if (
         this.userInventoryLength !== 0 &&
-        this.loadedPages - 1 - 1 <= this.currentPageIndex
+        this.loadedPages - 1 - 1 <= this.currentPageIndex &&
+        !this.endReached
       ) {
         this.fetchRecipesFromAPI(this.endRecipeIndex + 1, this.fetchAmount);
       }
@@ -133,6 +135,9 @@ export default {
           amount: amount
         })
         .then((res) => {
+          if (!this.endReached && amount != res.data.recipes.length) {
+            this.endReached = true;
+          }
           this.recipes = this.recipes.concat(res.data.recipes);
           this.endRecipeIndex = res.data.end_id;
         })
