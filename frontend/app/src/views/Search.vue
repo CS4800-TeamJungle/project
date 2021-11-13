@@ -87,12 +87,15 @@ export default {
     //Because it is a computed property anytime this.recipes.length or this.recipesPerPage change it is re-evaluated
     loadedPages: function () {
       return Math.ceil(this.recipes.length / this.recipesPerPage);
+    },
+    userInventoryLength: function () {
+      return this.$store.getters.getUserIngredientList().length;
     }
   },
   // This function is run each time the search result page is loaded
   created() {
     //If the user has ingredients send a request to the API for recipes
-    if (this.$store.getters.getUserIngredientList().length !== 0) {
+    if (this.userInventoryLength !== 0) {
       this.fetchRecipesFromAPI(0, this.fetchAmount);
     }
   },
@@ -107,7 +110,10 @@ export default {
         this.currentPageIndex++;
       }
       //If the user is within a page of the last loaded page send a request for more recipes
-      if (this.loadedPages - 1 - 1 <= this.currentPageIndex) {
+      if (
+        this.userInventoryLength !== 0 &&
+        this.loadedPages - 1 - 1 <= this.currentPageIndex
+      ) {
         this.fetchRecipesFromAPI(this.endRecipeIndex + 1, this.fetchAmount);
       }
     },
