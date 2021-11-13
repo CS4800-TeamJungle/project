@@ -64,7 +64,7 @@ def mongo_search_NER_post_v2():
 
     indexes = []
     for result in results:
-        output['recipes'].append({'title': result['title'], 'ingredients': result['ingredients'], 'directions': result['directions'], 'link': result['link'], 'NER': result['NER']})
+        output['recipes'].append({'index': result['index'], 'title': result['title'], 'ingredients': result['ingredients'], 'directions': result['directions'], 'link': result['link'], 'NER': result['NER']})
         indexes.append(result['index'])
     output['start_id'] = indexes[0]
     output['end_id'] = indexes[-1]
