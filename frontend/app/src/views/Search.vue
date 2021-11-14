@@ -2,84 +2,119 @@
   <div class="search">
     <h1>Search Recipes</h1>
     <div class="container" id="searchUI">
-      <template v-if="this.recipes.length > 0">
-        <div
-          class="recipe"
-          v-for="recipe in this.recipes.slice(
-            this.currentPageIndex * this.recipesPerPage,
-            this.currentPageIndex * this.recipesPerPage + this.recipesPerPage
-          )"
-          v-bind:key="recipe.index"
+      <div class="container justify-content-center" id="addSearchIngredients">
+        <vue-simple-suggest
+          class="ingredientSearch"
+          v-model="userInputName"
+          :list="this.$store.state.validIngs"
+          placeholder="Please enter ingredient name..."
+          display-attribute="name"
+          value-attribute="name"
+          :filter-by-query="true"
         >
-          {{ recipe.title }} |
-          <a class="recipe-link" v-bind:href="'https://' + recipe.link">{{
-            recipe.link
-          }}</a>
-          <br />
-          <span class="tags">
-            Tags:
-            <template v-for="tag in recipe.NER">{{ tag }} </template>
-          </span>
-          <hr />
-          <Collapsible
-            class="collapsible-steps"
-            :isOpen="false"
-            openLabel="Show less"
-            closedLabel="Show more"
+        </vue-simple-suggest>
+
+        <button
+          class="ingAddElement btn btn-secondary"
+          v-on:click="addSearchIngredient()"
+        >
+          Add Ingredient
+        </button>
+      </div>
+      <div id="searchIngredients">
+        <div
+          class="additionalIngredients"
+          v-for="item in this.searchIngredients"
+          v-bind:key="item"
+        >
+          <font-awesome-icon v-on:click="removeIngredient(item)" icon="times" />
+          {{ item }}
+        </div>
+      </div>
+
+      <div id="recipeResults">
+        <template v-if="this.recipes.length > 0">
+          <div
+            class="recipe"
+            v-for="recipe in this.recipes.slice(
+              this.currentPageIndex * this.recipesPerPage,
+              this.currentPageIndex * this.recipesPerPage + this.recipesPerPage
+            )"
+            v-bind:key="recipe.index"
           >
-            <div class="ingredients">
-              <span class="ingredientsTitle">Ingredients</span>
-              <div
-                v-for="(ing, index) in recipe.ingredients"
-                v-bind:key="ing.name"
-              >
-                {{ index + 1 }}. {{ ing }}
+            {{ recipe.title }} |
+            <a class="recipe-link" v-bind:href="'https://' + recipe.link">{{
+              recipe.link
+            }}</a>
+            <br />
+            <span class="tags">
+              Tags:
+              <template v-for="tag in recipe.NER">{{ tag }} </template>
+            </span>
+            <hr />
+            <Collapsible
+              class="collapsible-steps"
+              :isOpen="false"
+              openLabel="Show less"
+              closedLabel="Show more"
+            >
+              <div class="ingredients">
+                <span class="ingredientsTitle">Ingredients</span>
+                <div
+                  v-for="(ing, index) in recipe.ingredients"
+                  v-bind:key="ing.name"
+                >
+                  {{ index + 1 }}. {{ ing }}
+                </div>
               </div>
-            </div>
 
-            <div class="steps">
-              <span class="spanTitle">Steps</span>
-              <div
-                v-for="(step, index) in recipe.directions"
-                v-bind:key="step.name"
-              >
-                {{ index + 1 }}. {{ step }}
+              <div class="steps">
+                <span class="spanTitle">Steps</span>
+                <div
+                  v-for="(step, index) in recipe.directions"
+                  v-bind:key="step.name"
+                >
+                  {{ index + 1 }}. {{ step }}
+                </div>
               </div>
-            </div>
-          </Collapsible>
-        </div>
+            </Collapsible>
+          </div>
 
-        <div class="navigation">
-          <font-awesome-icon
-            class="nav-arrows"
-            v-on:click="pageLeft()"
-            style="float: left"
-            icon="angle-double-left"
-            size="2x"
-          />
+          <div class="navigation">
+            <font-awesome-icon
+              class="nav-arrows"
+              v-on:click="pageLeft()"
+              style="float: left"
+              icon="angle-double-left"
+              size="2x"
+            />
 
-          <font-awesome-icon
-            class="nav-arrows"
-            v-on:click="pageRight()"
-            style="float: right"
-            icon="angle-double-right"
-            size="2x"
-          />
-          <div>{{ this.currentPageIndex + 1 }} / {{ this.loadedPages }}</div>
-        </div>
-      </template>
+            <font-awesome-icon
+              class="nav-arrows"
+              v-on:click="pageRight()"
+              style="float: right"
+              icon="angle-double-right"
+              size="2x"
+            />
+            <div>{{ this.currentPageIndex + 1 }} / {{ this.loadedPages }}</div>
+          </div>
+        </template>
 
-      <template
-        v-else-if="this.recipes.length == 0 && this.userInventoryLength > 0"
-      >
-        <div class="container" id="loading"><h3>Loading...</h3></div>
-      </template>
+        <template
+          v-else-if="
+            this.recipes.length == 0 &&
+            (this.userInventoryLength > 0 || this.searchIngredients.length > 0)
+          "
+        >
+          <div class="container" id="loading"><h3>Loading...</h3></div>
+        </template>
 
-      <template v-else>
-        <h2 class="container text-center" id="emptyInventory">
-          Your inventory is empty
-        </h2></template
-      >
+        <template v-else>
+          <h2 class="container text-center" id="emptyInventory">
+            Your inventory is empty
+          </h2></template
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -88,12 +123,16 @@
 import axios from "axios";
 import "vue-collapsible-component/lib/vue-collapsible.css";
 import Collapsible from "vue-collapsible-component";
+import VueSimpleSuggest from "vue-simple-suggest";
+import "vue-simple-suggest/dist/styles.css"; // Optional CSS
 
 export default {
   name: "Search",
-  components: { Collapsible },
+  components: { Collapsible, VueSimpleSuggest },
   data() {
     return {
+      userInputName: "",
+      searchIngredients: [], //
       recipes: [], //An array holding the recipe objects
       recipesPerPage: 5, //The amount of recipes to show per page
       currentPageIndex: 0, //The index of the current page the user is viewing
@@ -133,7 +172,8 @@ export default {
       }
       //If the user is within a page of the last loaded page send a request for more recipes
       if (
-        this.userInventoryLength !== 0 &&
+        (this.userInventoryLength !== 0 ||
+          this.searchIngredients.length !== 0) &&
         this.loadedPages - 1 - 1 <= this.currentPageIndex &&
         !this.endReached
       ) {
@@ -150,7 +190,9 @@ export default {
       console.log("Fetching recipes...");
       axios
         .post("https://www.junglekitchen.top/api/search_v2", {
-          NER: this.$store.getters.getUserIngredientList(),
+          NER: this.$store.getters
+            .getUserIngredientList()
+            .concat(this.searchIngredients),
           start_id: startID,
           amount: amount
         })
@@ -163,13 +205,63 @@ export default {
         .catch((error) => {
           console.error(error);
         });
+    },
+    addSearchIngredient() {
+      if (this.searchIngredients.indexOf(this.userInputName) === -1) {
+        this.searchIngredients.push(this.userInputName);
+        this.userInputName = "";
+        this.refreshRecipes();
+        this.currentPageIndex = 0;
+        this.endReached = false;
+      }
+    },
+    removeIngredient(item) {
+      this.searchIngredients.splice(this.searchIngredients.indexOf(item), 1);
+      this.refreshRecipes();
+      this.currentPageIndex = 0;
+      this.endReached = false;
+    },
+    refreshRecipes() {
+      this.recipes = [];
+      this.fetchRecipesFromAPI(0, this.fetchAmount);
     }
   }
 };
 </script>
 
 <style scoped lang="scss">
-div#searchUI {
+div#addSearchIngredients {
+  display: flex;
+
+  input#inputAmount {
+    border: 1px solid #ccc;
+  }
+
+  .ingAddElement {
+    margin-left: 10px;
+  }
+
+  div.vue-simple-suggest {
+    width: 20%;
+  }
+}
+
+div#searchIngredients {
+  display: inline-flex;
+  margin-top: 10px;
+
+  div.additionalIngredients {
+    margin-right: 10px;
+    background-color: white;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 500px;
+    box-shadow: 0 0 5px;
+  }
+}
+
+div#recipeResults {
+  margin-top: 20px;
   padding-top: 10px;
   padding-bottom: 15px;
   background-color: white;
