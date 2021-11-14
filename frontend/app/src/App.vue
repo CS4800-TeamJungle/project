@@ -36,7 +36,7 @@ body {
 
 div.container-fluid {
   background-color: white;
-  box-shadow: 0px 5px 5px;
+  box-shadow: 0 0 10px;
 }
 
 div.header-container {

@@ -1,12 +1,11 @@
 <template>
   <div class="inventory">
-    <h1>This is an inventory page</h1>
+    <h1>Your Inventory</h1>
 
     <div id="inventoryUI">
-      <div id="addIngredient">
-        <p>Please enter the ingredient to add below</p>
-
+      <div class="container justify-content-center" id="addIngredient">
         <vue-simple-suggest
+          class="ingredientSearch"
           v-model="userInputName"
           :list="this.$store.state.validIngs"
           placeholder="Please enter ingredient name..."
@@ -17,6 +16,7 @@
         </vue-simple-suggest>
 
         <input
+          class="ingAddElement"
           id="inputAmount"
           type="text"
           v-model="userInputAmount"
@@ -30,6 +30,7 @@
             this.getIngById(this.getIngIdFromName(this.userInputName))
               .unitType != 'count'
           "
+          class="ingAddElement"
           id="unitSelector"
           v-model="userInputUnit"
         >
@@ -42,26 +43,44 @@
             {{ unit }}
           </option>
         </select>
-        <button v-on:click="addIngredient()">Add Ingredient</button>
-        <button>Save Inventory</button>
+
+        <button
+          class="ingAddElement btn btn-secondary"
+          v-on:click="addIngredient()"
+        >
+          Add Ingredient
+        </button>
+
+        <button class="ingAddElement btn btn-secondary">Save Inventory</button>
       </div>
 
-      <div id="userInventory">
-        <div
-          v-for="item in this.$store.state.userInventory"
-          v-bind:key="item.id"
+      <div class="container" id="userInventory">
+        <template v-if="this.$store.getters.getUserIngredientList().length > 0">
+          <div
+            class="inventoryItem"
+            v-for="item in this.$store.state.userInventory"
+            v-bind:key="item.id"
+          >
+            <font-awesome-icon
+              v-on:click="removeIngredient(item)"
+              icon="times"
+            />
+            {{ item.name }} - <input v-model="item.amount" />
+            <select v-if="item.unit.length > 0" v-model="item.unit">
+              <option
+                v-for="unit in getIngUnitList(getIngIdFromName(item.name))"
+                v-bind:key="unit"
+              >
+                {{ unit }}
+              </option>
+            </select>
+          </div>
+        </template>
+        <template v-else>
+          <h2 class="container text-center" id="emptyInventory">
+            Your inventory is empty
+          </h2></template
         >
-          <font-awesome-icon v-on:click="removeIngredient(item)" icon="times" />
-          {{ item.name }} - <input v-model="item.amount" />
-          <select v-if="item.unit.length > 0" v-model="item.unit">
-            <option
-              v-for="unit in getIngUnitList(getIngIdFromName(item.name))"
-              v-bind:key="unit"
-            >
-              {{ unit }}
-            </option>
-          </select>
-        </div>
       </div>
     </div>
   </div>
@@ -124,15 +143,38 @@ export default {
 };
 </script>
 
-<style scoped>
-div#inventoryUI {
+<style scoped lang="scss">
+div#addIngredient {
+  display: flex;
+
+  input#inputAmount {
+    border: 1px solid #ccc;
+  }
+
+  .ingAddElement {
+    margin-left: 10px;
+  }
+
+  div.vue-simple-suggest {
+    width: 20%;
+  }
+}
+
+div#userInventory {
+  margin-top: 20px;
+  padding-top: 20px;
+  background-color: white;
+  box-shadow: 0 0 10px;
   text-align: left;
-}
-input#inputAmount {
-  margin-left: 70px;
-  border: 1px solid #ccc;
-}
-div.v-suggest input {
-  width: inherit;
+  min-height: calc(100vh - 220px);
+
+  div.inventoryItem {
+    margin-bottom: 5px;
+  }
+
+  #emptyInventory {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
 }
 </style>
