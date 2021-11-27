@@ -492,30 +492,6 @@ export default new Vuex.Store({
         id: 120,
         name: "zucchini"
       }
-    ],
-    unitTypes: [
-      {
-        type: "volume",
-        units: [
-          "teaspoon",
-          "tablespoon",
-          "fluid oz",
-          "pint",
-          "cup",
-          "quart",
-          "gallon",
-          "milliliter",
-          "liter"
-        ]
-      },
-      {
-        type: "weight",
-        units: ["ounce", "pound", "gram", "kilogram"]
-      },
-      {
-        type: "count",
-        units: [""]
-      }
     ]
   },
   getters: {
@@ -524,11 +500,6 @@ export default new Vuex.Store({
     },
     getIngById: (state) => (id) => {
       return state.validIngs.find((item) => item.id == id);
-    },
-    getIngUnitList: (state, getters) => (id) => {
-      return state.unitTypes.find(
-        (item) => item.type == getters.getIngById(id).unitType
-      ).units;
     },
     userHasIngredient: (state) => (id) => {
       return state.userInventory.find((item) => item.id == id) != undefined;
