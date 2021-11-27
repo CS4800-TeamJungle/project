@@ -7,6 +7,7 @@
         <vue-simple-suggest
           class="ingredientSearch"
           v-model="userInputName"
+          ref="foodSelect"
           :list="this.$store.state.validIngs"
           placeholder="Please enter ingredient name..."
           display-attribute="name"
@@ -101,6 +102,7 @@ export default {
         });
         this.$store.commit("sortInventory");
         this.userInputName = "";
+        this.$refs.foodSelect.clearSuggestions();
         this.userInputAmount = "";
       }
     }
