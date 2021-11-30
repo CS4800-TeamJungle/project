@@ -1,6 +1,8 @@
 <template>
   <div class="home">
-    <font-awesome-icon icon="utensils" size="10x" />
+    <!-- <font-awesome-icon icon="utensils" size="10x" /> -->
+    <img src="../assets/Picture2.svg" />
+    <h1>Welcome to Jungle Kitchen!</h1>
     <p v-on:click="getResponse()">{{ data }}</p>
     <p v-on:click="getTime()">{{ time }}</p>
   </div>
