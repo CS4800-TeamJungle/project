@@ -7,6 +7,7 @@
         <vue-simple-suggest
           class="ingredientSearch"
           v-model="userInputName"
+          ref="foodSelect"
           :list="this.$store.state.validIngs"
           placeholder="Please enter ingredient name..."
           display-attribute="name"
@@ -22,27 +23,6 @@
           v-model="userInputAmount"
           placeholder="Enter Amount"
         />
-
-        <select
-          v-if="
-            this.userInputName.length > 0 &&
-            this.getIngIdFromName(this.userInputName) != undefined &&
-            this.getIngById(this.getIngIdFromName(this.userInputName))
-              .unitType != 'count'
-          "
-          class="ingAddElement"
-          id="unitSelector"
-          v-model="userInputUnit"
-        >
-          <option
-            v-for="unit in this.getIngUnitList(
-              this.getIngIdFromName(this.userInputName)
-            )"
-            v-bind:key="unit"
-          >
-            {{ unit }}
-          </option>
-        </select>
 
         <button
           class="ingAddElement btn btn-secondary"
@@ -66,14 +46,6 @@
               icon="times"
             />
             {{ item.name }} - <input v-model="item.amount" />
-            <select v-if="item.unit.length > 0" v-model="item.unit">
-              <option
-                v-for="unit in getIngUnitList(getIngIdFromName(item.name))"
-                v-bind:key="unit"
-              >
-                {{ unit }}
-              </option>
-            </select>
           </div>
         </template>
         <template v-else>
@@ -97,8 +69,7 @@ export default {
   data() {
     return {
       userInputName: "",
-      userInputAmount: "",
-      userInputUnit: ""
+      userInputAmount: ""
     };
   },
   methods: {
@@ -110,9 +81,6 @@ export default {
     },
     getIngById(id) {
       return this.$store.getters.getIngById(id);
-    },
-    getIngUnitList(id) {
-      return this.$store.getters.getIngUnitList(id);
     },
     userHasIngredient(id) {
       return this.$store.getters.userHasIngredient(id);
@@ -130,13 +98,12 @@ export default {
         this.$store.commit("addIngredient", {
           id: inputId,
           name: this.getIngById(inputId).name,
-          amount: this.userInputAmount,
-          unit: this.userInputUnit
+          amount: this.userInputAmount
         });
         this.$store.commit("sortInventory");
         this.userInputName = "";
+        this.$refs.foodSelect.clearSuggestions();
         this.userInputAmount = "";
-        this.userInputUnit = "";
       }
     }
   }

@@ -206,8 +206,14 @@ export default {
           console.error(error);
         });
     },
+    getIngIdFromName(name) {
+      return this.$store.getters.getIngIdFromName(name);
+    },
     addSearchIngredient() {
-      if (this.searchIngredients.indexOf(this.userInputName) === -1) {
+      if (
+        this.searchIngredients.indexOf(this.userInputName) === -1 &&
+        this.getIngIdFromName(this.userInputName) != undefined
+      ) {
         this.searchIngredients.push(this.userInputName);
         this.userInputName = "";
         this.refreshRecipes();
