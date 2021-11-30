@@ -32,6 +32,22 @@
         </button>
 
         <button class="ingAddElement btn btn-secondary">Save Inventory</button>
+
+        <input
+          class="ingAddElement"
+          id="inputAmount"
+          type="text"
+          v-model="userNumber"
+          placeholder="phone number"
+        />
+
+        <button
+          class="ingAddElement btn btn-secondary"
+          key=""
+          v-on:click="sendText()"
+        >
+          Send Text
+        </button>
       </div>
 
       <div class="container" id="userInventory">
@@ -69,9 +85,25 @@ export default {
   data() {
     return {
       userInputName: "",
-      userInputAmount: ""
+      userInputAmount: "",
+      userNumber: "",
+      options: {
+        method: "POST",
+        url: "https://twilio-sms.p.rapidapi.com/2010-04-01/Accounts/a/Messages.json",
+        params: {
+          to: "",
+          body: "test",
+          from: "+16106326075",
+          statusCallback: "94024-6602"
+        },
+        headers: {
+          "x-rapidapi-host": "twilio-sms.p.rapidapi.com",
+          "x-rapidapi-key": "1bc2e357a0mshecf7c7b674a810bp1b0f7ejsnfffa7ca10be4"
+        }
+      }
     };
   },
+
   methods: {
     removeIngredient(item) {
       this.$store.commit("removeIngredient", item.id);
@@ -105,6 +137,21 @@ export default {
         this.$refs.foodSelect.clearSuggestions();
         this.userInputAmount = "";
       }
+    },
+    sendText() {
+      this.options.params.to = this.userNumber;
+      this.options.params.body = this.$store.getters
+        .getUserShoppingList()
+        .join();
+      console.log(this.options.params.body);
+      axios
+        .request(this.options)
+        .then(function (response) {
+          console.log(response.data);
+        })
+        .catch(function (error) {
+          console.error(error);
+        });
     }
   }
 };

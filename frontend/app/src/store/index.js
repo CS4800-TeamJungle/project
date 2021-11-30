@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     test: 0,
     userInventory: [],
+    textInventory: [],
     validIngs: [
       {
         id: 0,
@@ -508,12 +509,27 @@ export default new Vuex.Store({
       return state.userInventory.map(function (item) {
         return item.name;
       });
+    },
+    getUserShoppingList: (state) => () => {
+      return state.textInventory.map(function (item) {
+        return item.name;
+      });
     }
   },
   mutations: {
     addIngredient(state, ingredient) {
       console.log(JSON.stringify(ingredient));
       state.userInventory.push(ingredient);
+    },
+    addShopping(state, ingredient) {
+      state.textInventory.push(ingredient);
+      console.log("worked");
+    },
+    printList(state) {
+      var l = state.textInventory.length;
+      for (var i = 0; i < l; i++) {
+        console.log(JSON.stringify(state.textInventory[i]));
+      }
     },
     removeIngredient(state, ingredientId) {
       for (var i = 0; i < state.userInventory.length; i++) {
