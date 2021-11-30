@@ -243,7 +243,7 @@ export default {
     },
     updateInventory(item) {
       var count = item.length;
-      if (this.userInventoryLength == 0) {
+      if (this.userInventoryLength > 0) {
         for (var i = 0; i < count; i++) {
           this.$store.commit("addShopping", {
             id: 0,
