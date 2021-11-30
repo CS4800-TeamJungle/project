@@ -51,6 +51,16 @@
               Tags:
               <template v-for="tag in recipe.NER">{{ tag }} </template>
             </span>
+            <template>
+              <div class="text-center">
+                <button
+                  class="ingAddElement btn btn-secondary"
+                  v-on:click="updateInventory(recipe.ingredients)"
+                >
+                  Cook Me
+                </button>
+              </div>
+            </template>
             <hr />
             <Collapsible
               class="collapsible-steps"
@@ -230,6 +240,19 @@ export default {
     refreshRecipes() {
       this.recipes = [];
       this.fetchRecipesFromAPI(0, this.fetchAmount);
+    },
+    updateInventory(item) {
+      var count = item.length;
+      if (this.userInventoryLength == 0) {
+        for (var i = 0; i < count; i++) {
+          this.$store.commit("addShopping", {
+            id: 0,
+            name: item[i],
+            amount: 0
+          });
+        }
+      }
+      console.log(this.$store.getters.getUserShoppingList());
     }
   }
 };
